@@ -1,0 +1,39 @@
+name: Build Cordova APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+
+    - name: Instalar dependências
+      run: |
+        sudo apt update
+        sudo apt install -y openjdk-17-jdk wget unzip nodejs npm
+        npm install -g cordova
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
+        unzip tools.zip -d $HOME/cmdline-tools
+        mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
+        mv $HOME/cmdline-tools/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/latest
+        yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+    - name: Build APK
+      env:
+        ANDROID_SDK_ROOT: ${{ env.HOME }}/Android/Sdk
+      run: |
+        cordova platform add android
+        cordova build android
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: The-2D-Pixel-Fishing-Grid-APK
+        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
