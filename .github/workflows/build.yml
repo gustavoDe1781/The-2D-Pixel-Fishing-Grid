@@ -5,9 +5,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  
+    
 
     steps:
     - name: Checkout código
